@@ -52,23 +52,30 @@ window.onload = function() {
                     break;
                 case 'KeyL':
                     let url = prompt('press config url','');
-                    load_json_from_file(url, (data) => {
-                        set_items(data);
-                        render_items(items_div);
-                    });
+                    if(url){
+                        let url_reg = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\*\+,;=.]+$/
+                        if(url_reg.test(url)){
+                            load_json_from_file(url, (data) => {
+                                set_items(data);
+                                render_items(items_div);
+                            });
+                        }
+                    }
+                    break;
                 case 'KeyC':
                     if(event.altKey && event.shiftKey && event.ctrlKey){
                         if(confirm('sure clear all?')){
                             clear_items();
                             render_items(items_div);
+                            localStorage.removeItem('default_bookmarkets');
                         }
                     }
+                    break;
                 default: break;
             }
         }
     });
 };
-
 
 
 function append_item(item) {
@@ -84,7 +91,9 @@ function delete_item(index) {
 }
 
 function get_items() {
-    return JSON.parse(localStorage.getItem('bookmarkets') || '[]');
+    var items = JSON.parse(localStorage.getItem('bookmarkets') || '[]') || [];
+    if(!Array.isArray(items)){ return []; }
+    return items;
 }
 
 function set_items(items) {
