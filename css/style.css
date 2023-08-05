@@ -1,0 +1,59 @@
+.items_div {
+    width: 100%;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.item_box {
+  float: left;
+  margin: 5px;
+  padding-left:0%;
+
+  position: relative;
+  width: 120px;
+  height: 50px;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.item_box a{
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  line-height: 50px;
+
+  z-index: 2;
+  
+  background: rgba(0,0,0,.35);
+  color: #FFF;
+  font-size: 13px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.item_box a:hover{
+  background: rgba(0,0,0,.45);
+  font-size: 15px;
+  font-weight: bold
+}
+
+.delete_item_div {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+
+  z-index: 3;
+}
+
+.delete_item_btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  line-height: 5px;
+  text-align: center;
+  color: white;
+}
