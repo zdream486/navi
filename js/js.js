@@ -1,16 +1,15 @@
 const items_div = document.getElementById('items_div');
 const title_input = document.getElementById('title');
 const url_input = document.getElementById('url');
+
 var edit_mode = false;
 
 window.onload = function() {
     if(localStorage.getItem('default_bookmarkets') == null) 
     {
         const url = 'data/default.json';
-        load_json_from_file(url, (data) => {
-            let items = get_items();
-            items = [...items, ...data];
-            set_items(items);
+        load_json_from_url(url, (items) => {
+            append_items(items);
             render_items(items_div);
             localStorage.setItem('default_bookmarkets', '');
         });
@@ -46,6 +45,11 @@ window.onload = function() {
                     edit_mode = !edit_mode;
                     render_items(items_div);
                     break;
+                case 'KeyE':
+                    let time = new Date();
+                    let str_file_name = time.valueOf() + '.json';
+                    export_json_file(get_items(), str_file_name);
+                    break;
                 case 'KeyS':
                     let function_form = document.getElementById('function_form');
                     function_form.hidden = !function_form.hidden;
@@ -55,7 +59,7 @@ window.onload = function() {
                     if(url){
                         let url_reg = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\*\+,;=.]+$/
                         if(url_reg.test(url)){
-                            load_json_from_file(url, (data) => {
+                            load_json_from_url(url, (data) => {
                                 set_items(data);
                                 render_items(items_div);
                             });
@@ -75,8 +79,27 @@ window.onload = function() {
             }
         }
     });
+
+    document.getElementById('local_file_import').addEventListener('change', function () {
+        if(this.value === '' || this.files.length < 1) {
+            return false;
+        }
+    
+        let selected_file = this.files[0];
+        load_json_from_local_file(selected_file, (items) => {
+            append_items(items);
+            render_items(items_div);
+        });
+    });
 };
 
+function append_items(items) {
+    if(!Array.isArray(items)){ return; }
+
+    const pre_items = get_items();
+    items = [...pre_items, ...items];
+    set_items(items);
+}
 
 function append_item(item) {
     const items = get_items();
@@ -127,7 +150,29 @@ function render_items(items_container) {
     });
 }
 
-function load_json_from_file(url, process_func) {
+
+function export_json_file(data, file_name) {
+    let content = JSON.stringify(data);
+    if(content.length == 0){return;}
+
+    let dom_a = document.createElement('a');
+    dom_a.download = file_name;
+    dom_a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(content);
+    dom_a.click();
+}
+
+function load_json_from_local_file(file, process_func) {
+    let reader = new FileReader();
+    reader.readAsText(file, "UTF-8");
+
+    reader.onload = function() {
+        var items = JSON.parse(this.result) || [];
+        process_func(items);
+    };
+    reader.onerror = function() { console.log(reader.error); };
+}
+
+function load_json_from_url(url, process_func) {
     fetch(url)
         .then(response => response.json())
         .then(data => { process_func(data); })
