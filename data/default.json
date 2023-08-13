@@ -1,30 +1,30 @@
 [
     {
-        "title": "轻松传",
+        "name": "轻松传",
         "url": "https://easychuan.cn"
     },
     {
-        "title": "十年之约-虫洞",
+        "name": "十年之约-虫洞",
         "url": "https://www.foreverblog.cn/go.html"
     },
     {
-        "title": "开往",
+        "name": "开往",
         "url": "https://travellings.link"
     },
     {
-        "title": "中文博客列表导航",
+        "name": "中文博客列表导航",
         "url": "https://zhblogs.ohyee.cc/go"
     },
     {
-        "title": "Guerrilla临时邮箱",
+        "name": "Guerrilla临时邮箱",
         "url": "https://www.guerrillamail.com/zh"
     },
     {
-        "title": "ip.skk",
+        "name": "ip.skk",
         "url": "https://ip.skk.moe/"
     },
     {
-        "title": "port.ping.pe",
+        "name": "port.ping.pe",
         "url": "https://port.ping.pe/"
     }
 ]

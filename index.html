@@ -10,17 +10,22 @@
 
 </head>
 <body>
-  <form id="function_form" hidden>
-    <input type="file" id="local_file_import">
-    <br><br>
-    <label for="title">Title:</label>
-    <input type="text" id="title">
-    <label for="url">URL:</label>
-    <input type="text" id="url">
-    <button type="button" id="append_item">Add</button>
-  </form>
-  <br>
-  <div id="items_div"></div>
+  <div class="full_page" id="edit_page">
+    <div class="flex_page">
+      <div class="edit_box">
+        <input type="text" id="link_name" placeholder="name">
+        <input type="text" id="link_url" placeholder="url">
+        <div id="edit_button_box">
+          <button type="button" id="accept_edit_btn">Add</button>
+          <button type="button" id="reject_edit_btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="full_page" id="content_box">
+    <div id="link_list"></div>
+  </div>
   
   <script type="text/javascript" src="js/js.js"></script>
 </body>

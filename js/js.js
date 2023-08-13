@@ -1,6 +1,4 @@
-const items_div = document.getElementById('items_div');
-const title_input = document.getElementById('title');
-const url_input = document.getElementById('url');
+const items_div = document.getElementById('link_list');
 
 var edit_mode = false;
 
@@ -17,24 +15,42 @@ window.onload = function() {
 
     render_items(items_div);
 
-    document.getElementById('append_item').addEventListener('click', () => {
-        const title = title_input.value;
+    document.getElementById('accept_edit_btn').addEventListener('click', () => {
+        const name_input = document.getElementById('link_name');
+        const url_input = document.getElementById('link_url');
+        const name = name_input.value;
         const input_url = url_input.value;
-        if (title && url) {
+        if (name && url) {
             const url = input_url.replace(/^(?!https?:\/\/)/, 'https://');
             const item = {
-                title,
-                url
+                name: name,
+                url: url
             };
             append_item(item);
             render_items(items_div);
 
-            title_input.value = '';
+            name_input.value = '';
             url_input.value = '';
+
+            set_edit_page_visible(false);
         }
     });
 
+    document.getElementById('reject_edit_btn').addEventListener('click', () => {
+        set_edit_page_visible(false);
+    });
+
+    document.getElementById('link_url').addEventListener('keydown',  (event) => {
+        if(event.code === 'Enter' || event.code === 'NumpadEnter' ){
+            document.getElementById('accept_edit_btn').click();
+        }
+    });
+    
     document.addEventListener('keydown', (event) => {
+        if(event.code === 'Escape'){
+            set_edit_page_visible(false);
+        }
+
         if(document.activeElement.matches('input')){return;}
 
         if(event.shiftKey)
@@ -43,19 +59,20 @@ window.onload = function() {
             {
                 case 'KeyD':
                     edit_mode = !edit_mode;
-                    render_items(items_div);
+                    update_edit_mode();
                     break;
                 case 'KeyE':
-                    let time = new Date();
-                    let str_file_name = time.valueOf() + '.json';
-                    export_json_file(get_items(), str_file_name);
+                    if(confirm('sure export?')){
+                        let time = new Date();
+                        let str_file_name = time.valueOf() + '.json';
+                        export_json_file(get_items(), str_file_name);
+                    }
                     break;
                 case 'KeyS':
-                    let function_form = document.getElementById('function_form');
-                    function_form.hidden = !function_form.hidden;
+                    set_edit_page_visible(true);
                     break;
-                case 'KeyL':
-                    let url = prompt('press config url','');
+                case 'KeyL':{
+                    let url = window.prompt('press config url','');
                     if(url){
                         let url_reg = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\*\+,;=.]+$/
                         if(url_reg.test(url)){
@@ -65,6 +82,25 @@ window.onload = function() {
                             });
                         }
                     }
+                }
+                    break;
+                case 'KeyI':{
+                    let dom = document.createElement('input');
+                    dom.type = 'file';
+                    dom.accept = 'application/JSON'
+                    dom.onchange = function () {
+                        if(this.value === '' || this.files.length < 1) {
+                            return false;
+                        }
+                    
+                        let selected_file = this.files[0];
+                        load_json_from_local_file(selected_file, (items) => {
+                            append_items(items);
+                            render_items(items_div);
+                        });
+                    };
+                    dom.click();
+                }
                     break;
                 case 'KeyC':
                     if(event.altKey && event.shiftKey && event.ctrlKey){
@@ -78,18 +114,6 @@ window.onload = function() {
                 default: break;
             }
         }
-    });
-
-    document.getElementById('local_file_import').addEventListener('change', function () {
-        if(this.value === '' || this.files.length < 1) {
-            return false;
-        }
-    
-        let selected_file = this.files[0];
-        load_json_from_local_file(selected_file, (items) => {
-            append_items(items);
-            render_items(items_div);
-        });
     });
 };
 
@@ -128,28 +152,51 @@ function clear_items() {
 }
 
 function render_items(items_container) {
-    const items = get_items();
-    items_container.innerHTML = '';
-    items.forEach((item, index) => {
-        const item_box = document.createElement('div');
-        item_box.setAttribute('class', 'item_box');
-        item_box.innerHTML = `<a href="${item.url}" target="_blank" rel="nofollow">${item.title}</a><div class="delete_item_div" hidden><div class="delete_item_btn">x</div></div>`;
+    if(items_container === undefined || items_container === null ){return;}
 
-        items_container.appendChild(item_box);
+    const groups = [{
+        name: "common",
+        link_list: get_items()
+     }];
+    
+    items_container.innerHTML = '';
+    groups.forEach((group, index) => {
+        const link_list_group = document.createElement('div');
+        link_list_group.setAttribute('class', 'link_list_group');
+
+        const link_list_data = group["link_list"];
+        link_list_data.forEach((link_data, index) => {
+            const link_box = document.createElement('div');
+            link_box.setAttribute('class', 'link_card');
+            link_box.innerHTML = `<a href="${link_data.url}" target="_blank" rel="nofollow">${link_data.name}</a><div class="link_card_delete"></div>`;
+    
+            link_list_group.appendChild(link_box);
+        });
+
+        items_container.appendChild(link_list_group);
     });
 
-    document.querySelectorAll('.delete_item_btn').forEach((item, index) => {
+    document.querySelectorAll('.link_card_delete').forEach((item, index) => {
         item.addEventListener('click', () => {
             delete_item(index);
             render_items(items_div);
         });
     });
 
-    document.querySelectorAll('.delete_item_div').forEach((item, index) => {
+    update_edit_mode();
+    set_edit_page_visible(false);
+}
+
+function set_edit_page_visible(show) {
+    let box = document.getElementById('edit_page');
+    box.hidden = !show;
+}
+
+function update_edit_mode(){
+    document.querySelectorAll('.link_card_delete').forEach((item, index) => {
         item.hidden = !edit_mode;
     });
 }
-
 
 function export_json_file(data, file_name) {
     let content = JSON.stringify(data);
